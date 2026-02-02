@@ -1,159 +1,160 @@
-# Claude Code + OpenWebUI
+# Claude Code + OpenWebUI Integration
 
 ## Project Definition
 
-A lightweight configuration repo for wiring Claude Code into a private, self-hosted LLM stack using OpenWebUI.
+A lightweight configuration repo for integrating Claude Code with a private, self-hosted LLM stack using OpenWebUI.
 
-## Requirements
+## Overview
 
-### OpenWebUI
+This project enables seamless integration between Claude Code, a powerful CLI tool for AI-assisted coding, and OpenWebUI, a self-hosted web interface for interacting with Large Language Models (LLMs). The integration is facilitated by Claude Code Router (CCR), which acts as an intermediary between Claude Code and the OpenAI-compatible endpoint provided by OpenWebUI.
 
-You must have OpenWebUI running either locally or remotely
+### System Architecture
 
-Examples:
 ```
-Local: http://localhost:3000
-
-Remote: https://openwebui.yourdomain.com
+┌──────────────┐    ┌──────────────┐    ┌─────────────────┐    ┌───────────┐
+│  Claude Code │ -> │ Claude Code  │ -> │ strip-reasoning │ -> │ OpenWebUI │
+│     CLI      │    │    Router    │    │     proxy       │    │           │
+└──────────────┘    └──────────────┘    └─────────────────┘    └───────────┘
 ```
-### OpenWebUI API Key
 
-An API key must be enabled in OpenWebUI.
-This key will be used by Claude Code Router for authentication.
+The strip-reasoning proxy is optional and can be bypassed if not needed.
+
+## Prerequisites
+
+Before setting up the integration, ensure you have the following:
+
+1. OpenWebUI installed and running (locally or remotely)
+2. An OpenWebUI API key
+3. Node.js and npm installed on your system
+4. Claude Code installed (version 1.0.0 or higher)
+5. Claude Code Router (version 1.1.0 or higher)
+6. Bash or Zsh shell
 
 ## Installation
 
-### Claude Code
+### 1. Claude Code (v1.0.0+)
 
-Install Claude Code using the official installer and follow the setup instructions in the repo:
+Install Claude Code using the official installer. The installation method may vary depending on your environment.
 
-Repo: https://github.com/anthropics/claude-code
+For detailed installation instructions and methods, visit the [Claude Code Setup Documentation](https://code.claude.com/docs/en/setup#installation).
 
-### Claude Code Router (CCR)
+After installation, verify your Claude Code version:
 
-Install Claude Code Router, which sits between Claude Code and your OpenAI-compatible endpoint (OpenWebUI / LiteLLM):
-
-Repo: https://github.com/musistudio/claude-code-router
-
-Install globally via npm:
 ```
-npm install -g @musistudio/claude-code-router
+claude --version
 ```
+
+Ensure you have version 1.0.0 or higher installed.
+
+For more information and usage instructions, visit the [Claude Code repository](https://github.com/anthropics/claude-code).
+
+### 2. Claude Code Router (CCR) (v1.1.0+)
+
+Install Claude Code Router globally via npm:
+
+```
+npm install -g @musistudio/claude-code-router@1.1.0
+```
+
+For more information, visit the [Claude Code Router repository](https://github.com/musistudio/claude-code-router).
 
 ## Setup
 
 ### 1. Configure Claude Code Router
 
-Navigate to the Claude Code Router config directory in your home folder. Create it if it does not exist:
+Use the provided CCR configuration file located in the `/config` folder of this repository:
 
-```
-cd ~
-mkdir -p .claude-code-router
-cd .claude-code-router
-```
+- [CCR config.json](/config/config.json)
 
-Create a config.json file with the following contents:
+Copy this file to your Claude Code Router configuration directory:
 
-```
-{
-  "LOG": true,
-  "LOG_LEVEL": "debug",
-  "HOST": "127.0.0.1",
-  "PORT": 3456,
-  "API_TIMEOUT_MS": 600000,
-
-  "Providers": [
-    {
-      "name": "openwebui",
-      "api_base_url": "http://127.0.0.1:3457/api/v1/chat/completions",
-      "api_key": "$OPENWEBUI_KEY",
-      "models": ["claude-3.5-sonnet"]
-    }
-  ],
-
-  "Router": {
-    "default": "openwebui,claude-3.5-sonnet",
-    "background": "openwebui,claude-3.5-sonnet",
-    "think": "openwebui,claude-3.5-sonnet",
-    "longContext": "openwebui,claude-3.5-sonnet"
-  }
-}
+```bash
+mkdir -p ~/.claude-code-router
+cp /path/to/repo/config/config.json ~/.claude-code-router/config.json
 ```
 
-> Note: This config.json is configured to runthe strip-reasoning proxy, if you do **not** need to run you can point
-> `api_base_url` directly at OpenWebUI
->
->
-> Replace `http://127.0.0.1:3457` with `$OPENWEBUI_URL`
+Note: This configuration assumes you're using the strip-reasoning proxy. If not needed, replace `http://127.0.0.1:3457` with your actual OpenWebUI URL.
 
+### 2. Install shell configuration
 
-#### Helper cURL to list all models available through OpenWebUI
+Use the provided install script:
 
-```
-curl -s \
-  -H "Authorization: Bearer $OPENWEBUI_KEY" \
-  "$OPENWEBUI_URL/api/v1/models" \
-| jq -r '.data[].id'
-```
+- [install-shell.sh](/scripts/install-shell.sh)
 
-> This assumes you've set your environment variables in your shell. See following steps
+Run the install script:
 
-### 2. Optional: Run the strip-reasoning proxy
-
-Some Bedrock-backed model stacks reject requests when certain “reasoning” fields are included in the payload (for example: reasoning, reasoning_effort, etc). If you run into 400 errors related to request shape, you can run a small local proxy that removes those fields before forwarding the request upstream.
-
-> This step is optional. If your model stack accepts the request payloads
-> without error, you can skip this proxy and point Claude Code Router directly
-> at OpenWebUI.
-
-
-This proxy listens on:
-```
-http://127.0.0.1:3457/api/v1/chat/completions
-```
-…and forwards requests to your upstream OpenWebUI chat completions endpoint.
-
-#### Create the proxy script
-
-Create a file named strip-reasoning-proxy.mjs somewhere convenient (for example in this repo under scripts/):
-
-#### Run the proxy
-
-Set the upstream URL to your real OpenWebUI (or LiteLLM) endpoint and start the server:
-
-```
-export UPSTREAM_URL="$OPENWEBUI_URL/api/v1/chat/completions"
-node strip-reasoning-proxy.mjs
+```bash
+chmod +x /path/to/repo/scripts/install-shell.sh
+/path/to/repo/scripts/install-shell.sh
 ```
 
-### 3. Install shell configuration and start CCR
+This script will update your shell configuration and set up the necessary environment variables and aliases.
 
-From the root of this repo, make the install script executable and run it:
+### 3. Set up environment variables
 
-```
-chmod +x scripts/install-shell.sh
-./scripts/install-shell.sh
-```
+After running the install script, edit your `~/.bashrc` or `~/.zshrc` file to replace the placeholder values with your actual OpenWebUI URL and API key:
 
-> Note: `DISABLE_PROMPT_CACHING=1` is optional and model-dependent.
-> Some models work correctly with prompt caching enabled. If you do not
-> encounter issues related to cached prompts, this flag can be removed
-> from `install-shell.sh`.
-
-Reload your shell so the new function is available:
-
-```
-source ~/.zshrc   # or ~/.bashrc
+```bash
+export OPENWEBUI_URL="http://your-openwebui-url:port"
+export OPENWEBUI_KEY="your-openwebui-api-key"
 ```
 
-Start Claude Code Router with the correct environment:
-```
-start-ccr
+### 4. Optional: Set up the strip-reasoning proxy
+
+If your model stack rejects requests with certain fields, use the provided proxy script to remove them:
+
+- [strip-reasoning-proxy.mjs](/scripts/strip-reasoning-proxy.mjs)
+
+Copy this script to a convenient location:
+
+```bash
+cp /path/to/repo/scripts/strip-reasoning-proxy.mjs ~/strip-reasoning-proxy.mjs
 ```
 
-Once CCR is running, you can launch Claude Code:
-```
-claude
-```
+## Getting Started
 
-At this point, Claude Code routes all requests through Claude Code Router and OpenWebUI.
+1. Start the strip-reasoning proxy (if needed):
+   ```
+   export UPSTREAM_URL="$OPENWEBUI_URL/api/v1/chat/completions"
+   node ~/strip-reasoning-proxy.mjs
+   ```
+
+2. Start Claude Code Router:
+   ```
+   start-ccr
+   ```
+
+3. Launch Claude Code:
+   ```
+   claude
+   ```
+
+You're now ready to use Claude Code with your self-hosted LLM stack!
+
+## Troubleshooting
+
+1. **400 errors related to request shape**:
+   - Ensure the strip-reasoning proxy is running and configured correctly.
+   - Check if your OpenWebUI version is compatible with the current request format.
+
+2. **Authentication errors**:
+   - Verify that your OpenWebUI API key is set correctly in the environment variables.
+   - Check if the API key is still valid in your OpenWebUI settings.
+
+3. **Connection refused errors**:
+   - Make sure OpenWebUI is running and accessible at the configured URL.
+   - Check if any firewalls or network settings are blocking the connection.
+
+4. **Unexpected model behavior**:
+   - If you experience issues related to cached prompts, try enabling `DISABLE_PROMPT_CACHING=1`.
+   - Verify that the selected model in the CCR config matches an available model in OpenWebUI.
+
+For more detailed troubleshooting and the latest updates, please refer to the official documentation for [Claude Code](https://github.com/anthropics/claude-code), [Claude Code Router](https://github.com/musistudio/claude-code-router), and [OpenWebUI](https://github.com/openwebui/openwebui).
+
+## Additional Resources
+
+- [Claude Code Documentation](https://docs.anthropic.com/claude/docs)
+- [OpenWebUI Documentation](https://docs.openwebui.com/)
+- [Claude Code Router README](https://github.com/musistudio/claude-code-router/blob/main/README.md)
+
+For any further assistance or to report issues, please open an issue in this repository.
