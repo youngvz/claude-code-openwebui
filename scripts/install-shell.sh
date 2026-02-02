@@ -27,6 +27,9 @@ cat <<'EOF' >> "$RC_FILE"
 export OPENWEBUI_URL="https://openwebui.yourdomain.com"
 export OPENWEBUI_KEY="xyz"
 
+# Add the scripts directory to PATH
+export PATH="$PATH:$(dirname "$0")"
+
 start-ccr() {
   echo "🔧 Setting OpenWebUI (upstream) env vars..."
   export OPENWEBUI_BASE_URL="$OPENWEBUI_URL"
@@ -47,6 +50,11 @@ start-ccr() {
 
   echo "✅ CCR ready"
   echo "   ANTHROPIC_BASE_URL = $ANTHROPIC_BASE_URL"
+}
+
+start-claude-environment() {
+  echo "🚀 Starting Claude Code environment..."
+  start-claude-environment.sh
 }
 # <<< claude-code-openwebui <<<
 

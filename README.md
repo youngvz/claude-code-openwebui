@@ -25,7 +25,7 @@ Before setting up the integration, ensure you have the following:
 
 1. OpenWebUI installed and running (locally or remotely)
 2. An OpenWebUI API key
-3. Node.js and npm installed on your system
+3. Node.js (v14.0.0+) and npm (v6.0.0+) installed on your system
 4. Claude Code installed (version 1.0.0 or higher)
 5. Claude Code Router (version 1.1.0 or higher)
 6. Bash or Zsh shell
@@ -88,7 +88,7 @@ chmod +x /path/to/repo/scripts/install-shell.sh
 /path/to/repo/scripts/install-shell.sh
 ```
 
-This script will update your shell configuration and set up the necessary environment variables and aliases.
+This script will update your shell configuration, set up the necessary environment variables and aliases, and add the new `start-claude-environment.sh` script to your PATH.
 
 ### 3. Set up environment variables
 
@@ -105,29 +105,20 @@ If your model stack rejects requests with certain fields, use the provided proxy
 
 - [strip-reasoning-proxy.mjs](/scripts/strip-reasoning-proxy.mjs)
 
-Copy this script to a convenient location:
-
-```bash
-cp /path/to/repo/scripts/strip-reasoning-proxy.mjs ~/strip-reasoning-proxy.mjs
-```
+The script is already included in the repository and will be used automatically by the `start-claude-environment.sh` script.
 
 ## Getting Started
 
-1. Start the strip-reasoning proxy (if needed):
-   ```
-   export UPSTREAM_URL="$OPENWEBUI_URL/api/v1/chat/completions"
-   node ~/strip-reasoning-proxy.mjs
-   ```
+To start the entire Claude Code environment with a single command, use:
 
-2. Start Claude Code Router:
-   ```
-   start-ccr
-   ```
+```bash
+start-claude-environment
+```
 
-3. Launch Claude Code:
-   ```
-   claude
-   ```
+This command will:
+1. Start the strip-reasoning proxy (if needed)
+2. Initialize Claude Code Router (CCR)
+3. Launch Claude Code
 
 You're now ready to use Claude Code with your self-hosted LLM stack!
 
@@ -148,6 +139,11 @@ You're now ready to use Claude Code with your self-hosted LLM stack!
 4. **Unexpected model behavior**:
    - If you experience issues related to cached prompts, try enabling `DISABLE_PROMPT_CACHING=1`.
    - Verify that the selected model in the CCR config matches an available model in OpenWebUI.
+
+5. **Issues with the combined startup script**:
+   - Check the console output for any error messages.
+   - Ensure all components (strip-reasoning proxy, CCR, Claude Code) are installed correctly.
+   - Verify that the `OPENWEBUI_URL` and `OPENWEBUI_KEY` environment variables are set correctly.
 
 For more detailed troubleshooting and the latest updates, please refer to the official documentation for [Claude Code](https://github.com/anthropics/claude-code), [Claude Code Router](https://github.com/musistudio/claude-code-router), and [OpenWebUI](https://github.com/openwebui/openwebui).
 
