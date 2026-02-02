@@ -30,8 +30,18 @@ The project architecture consists of the following components:
    - Forwards requests to: `$OPENWEBUI_URL/api/v1/chat/completions`
 
 3. Environment Setup:
+   - Make all scripts in the repository executable:
+     ```
+     chmod +x /path/to/your/scripts/*.sh
+     chmod +x /path/to/your/scripts/*.mjs
+     ```
+     Replace `/path/to/your/scripts/` with the actual path to the `scripts` directory in your project.
    - The `install-shell.sh` script in the `scripts/` directory sets up the necessary environment variables and shell functions.
-   - It also adds the `start-claude-environment.sh` script to your PATH for simplified startup.
+   - Run the install script:
+     ```
+     /path/to/your/scripts/install-shell.sh
+     ```
+   - This script adds the `start-claude-environment.sh` script to your PATH for simplified startup.
 
 ## Common Commands
 

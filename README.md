@@ -75,16 +75,24 @@ cp /path/to/repo/config/config.json ~/.claude-code-router/config.json
 
 Note: This configuration assumes you're using the strip-reasoning proxy. If not needed, replace `http://127.0.0.1:3457` with your actual OpenWebUI URL.
 
-### 2. Install shell configuration
+### 2. Install shell configuration and make scripts executable
 
-Use the provided install script:
+First, make all scripts in the repository executable:
+
+```bash
+chmod +x /path/to/repo/scripts/*.sh
+chmod +x /path/to/repo/scripts/*.mjs
+```
+
+Replace `/path/to/repo/scripts/` with the actual path to the `scripts` directory in your project.
+
+Now, use the provided install script:
 
 - [install-shell.sh](/scripts/install-shell.sh)
 
 Run the install script:
 
 ```bash
-chmod +x /path/to/repo/scripts/install-shell.sh
 /path/to/repo/scripts/install-shell.sh
 ```
 
