@@ -23,6 +23,7 @@ fi
 cat <<'EOF' >> "$RC_FILE"
 
 # >>> claude-code-openwebui >>>
+# TODO: Replace these placeholder values with your actual OpenWebUI URL and API key
 export OPENWEBUI_URL="https://openwebui.yourdomain.com"
 export OPENWEBUI_KEY="xyz"
 

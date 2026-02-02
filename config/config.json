@@ -1,0 +1,23 @@
+{
+  "LOG": true,
+  "LOG_LEVEL": "debug",
+  "HOST": "127.0.0.1",
+  "PORT": 3456,
+  "API_TIMEOUT_MS": 600000,
+
+  "Providers": [
+    {
+      "name": "openwebui",
+      "api_base_url": "http://127.0.0.1:3457/api/v1/chat/completions",
+      "api_key": "$OPENWEBUI_KEY",
+      "models": ["claude-3.5-sonnet"]
+    }
+  ],
+
+  "Router": {
+    "default": "openwebui,claude-3.5-sonnet",
+    "background": "openwebui,claude-3.5-sonnet",
+    "think": "openwebui,claude-3.5-sonnet",
+    "longContext": "openwebui,claude-3.5-sonnet"
+  }
+}
