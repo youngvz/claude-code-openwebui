@@ -80,13 +80,23 @@ Create a config.json file with the following contents:
 }
 ```
 
-> Note: If you do **not** need to run the strip-reasoning proxy, you can point
+> Note: This config.json is configured to runthe strip-reasoning proxy, if you do **not** need to run you can point
 > `api_base_url` directly at OpenWebUI
+>
 >
 > Replace `http://127.0.0.1:3457` with `$OPENWEBUI_URL`
 
 
-TODO: Give helper method to list models available through OpenWebUI
+#### Helper cURL to list all models available through OpenWebUI
+
+```
+curl -s \
+  -H "Authorization: Bearer $OPENWEBUI_KEY" \
+  "$OPENWEBUI_URL/api/v1/models" \
+| jq -r '.data[].id'
+```
+
+> This assumes you've set your environment variables in your shell. See following steps
 
 ### 2. Optional: Run the strip-reasoning proxy
 
