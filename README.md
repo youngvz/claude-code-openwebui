@@ -83,6 +83,32 @@ This command will:
 
 You're now ready to use Claude Code with your self-hosted LLM stack!
 
+## Using Claude Code
+
+After installation, use the `claude` command as usual. The setup ensures all necessary environment variables are loaded.
+
+If you encounter environment variable issues:
+
+1. Check your `~/.claude_env` file exists and has correct permissions:
+   ```
+   ls -l ~/.claude_env
+   ```
+
+2. Ensure it contains the correct ANTHROPIC_BASE_URL and ANTHROPIC_API_KEY:
+   ```
+   cat ~/.claude_env | grep ANTHROPIC
+   ```
+
+3. Restart your terminal session or run:
+   ```
+   source ~/.bashrc  # or source ~/.zshrc if using zsh
+   ```
+
+4. If problems persist, try running the start script again:
+   ```
+   /path/to/repo/scripts/claude-setup.sh --start
+   ```
+
 ## Using claude-setup.sh
 
 The `claude-setup.sh` script provides several options for managing your Claude environment:
@@ -99,6 +125,21 @@ For example, to check the status of your Claude services:
 
 ```bash
 /path/to/repo/scripts/claude-setup.sh --status
+```
+
+## Environment Variables
+
+The Claude Code environment uses a `.claude_env` file in your home directory to store configuration. This file is automatically created during the installation process and is loaded when starting the Claude environment.
+
+Important notes:
+- The `.claude_env` file may contain sensitive information. Ensure it has appropriate permissions (600).
+- Environment variables are now automatically exported and available to all Claude components.
+- If you need to modify environment variables, edit the `~/.claude_env` file and restart the Claude environment.
+
+To manually load the environment variables in your current shell session, use:
+
+```bash
+source ~/.claude_env
 ```
 
 ## Troubleshooting
@@ -122,6 +163,11 @@ For example, to check the status of your Claude services:
    - Check the console output for any error messages.
    - Run `claude-setup.sh --status` to diagnose any component issues.
    - Ensure that the `OPENWEBUI_URL` and `OPENWEBUI_KEY` environment variables are set correctly in your `.claude_env` file.
+
+6. **Environment variable issues**:
+   - Verify that the `.claude_env` file exists in your home directory and has the correct permissions (600).
+   - Try restarting your terminal session or sourcing your shell's configuration file.
+   - Use the `~/.claude_wrapper` script to run Claude Code if environment variables are not being loaded correctly.
 
 For more detailed troubleshooting and the latest updates, please refer to the official documentation for [Claude Code](https://github.com/anthropics/claude-code), [Claude Code Router](https://github.com/musistudio/claude-code-router), and [OpenWebUI](https://github.com/openwebui/openwebui).
 

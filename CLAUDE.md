@@ -60,6 +60,21 @@ The project architecture consists of the following components:
    curl -s -H "Authorization: Bearer $OPENWEBUI_KEY" "$OPENWEBUI_URL/api/v1/models" | jq -r '.data[].id'
    ```
 
+## Environment Variables
+
+The Claude Code environment uses a `.claude_env` file in your home directory to store configuration. This file is automatically created during the installation process and is loaded when starting the Claude environment.
+
+Important notes:
+- The `.claude_env` file contains sensitive information. It has restricted permissions (600) for security.
+- Environment variables are automatically exported and available to all Claude components.
+- If you need to modify environment variables, edit the `~/.claude_env` file and restart the Claude environment.
+
+To manually load the environment variables in your current shell session:
+
+```bash
+source ~/.claude_env
+```
+
 ## Development Notes
 
 - The `claude-setup.sh` script manages all aspects of the Claude environment, including setup, configuration, and startup.
