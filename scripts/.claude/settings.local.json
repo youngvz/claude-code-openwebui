@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl:*)",
+      "Bash(ping:*)",
+      "Bash(./start-claude-environment.sh:*)",
+      "Bash(alias:*)",
+      "Bash(echo:*)",
+      "Bash(ccr status:*)",
+      "Bash(ccr restart)",
+      "Bash(ccr start)",
+      "Bash(export:*)",
+      "Bash(node:*)"
+    ]
+  }
+}

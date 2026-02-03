@@ -17,6 +17,29 @@ show_help() {
     echo "  --help      Display this help message"
 }
 
+# Function to export environment variables
+export_env_variables() {
+    if [ -f "$HOME/.claude_env" ]; then
+        set -a
+        source "$HOME/.claude_env"
+        set +a
+    else
+        echo "Error: $HOME/.claude_env not found. Please run the installation wizard."
+        exit 1
+    fi
+}
+
+# Function to check .claude_env file permissions
+check_env_file_permissions() {
+    if [ -f "$HOME/.claude_env" ]; then
+        current_perms=$(stat -c "%a" "$HOME/.claude_env")
+        if [ "$current_perms" != "600" ]; then
+            echo "Warning: $HOME/.claude_env has incorrect permissions. Fixing..."
+            chmod 600 "$HOME/.claude_env"
+        fi
+    fi
+}
+
 # Function to run the installation wizard
 run_install_wizard() {
     echo "Running installation wizard..."
@@ -83,6 +106,21 @@ EOL
         return 1
     fi
 
+    # Create wrapper script for Claude Code
+    cat > "$HOME/.claude_wrapper" << EOL
+#!/bin/bash
+source "$HOME/.claude_env"
+exec claude "\$@"
+EOL
+    chmod +x "$HOME/.claude_wrapper"
+
+    # Update user's PATH
+    echo 'export PATH="$HOME:$PATH"' >> "$HOME/.bashrc"
+    echo 'export PATH="$HOME:$PATH"' >> "$HOME/.zshrc"
+
+    echo "WARNING: The .claude_env file may contain sensitive information. Ensure it has appropriate permissions."
+    chmod 600 "$HOME/.claude_env"
+
     echo "Installation complete. Please restart your terminal or run 'source $ENV_FILE'."
     return 0
 }
@@ -91,13 +129,11 @@ EOL
 start_environment() {
     echo "Starting Claude environment..."
 
-    # Load environment variables
-    if [ -f "$HOME/.claude_env" ]; then
-        source "$HOME/.claude_env"
-    else
-        echo "Error: Environment file not found. Please run --install first."
-        exit 1
-    fi
+    # Load and export environment variables
+    export_env_variables
+
+    # Check .claude_env file permissions
+    check_env_file_permissions
 
     # Start strip-reasoning proxy
     SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
@@ -142,6 +178,12 @@ manage_config() {
 check_status() {
     echo "Checking service status..."
 
+    # Load and export environment variables
+    export_env_variables
+
+    # Check .claude_env file permissions
+    check_env_file_permissions
+
     # Check strip-reasoning proxy
     if curl -s http://127.0.0.1:3457/health > /dev/null; then
         echo "strip-reasoning proxy: Running"
@@ -158,7 +200,6 @@ check_status() {
 
     # Check OpenWebUI
     if [ -f "$HOME/.claude_env" ]; then
-        source "$HOME/.claude_env"
         if curl -s -H "Authorization: Bearer $OPENWEBUI_KEY" "$OPENWEBUI_URL/api/v1/models" > /dev/null; then
             echo "OpenWebUI: Accessible"
         else
