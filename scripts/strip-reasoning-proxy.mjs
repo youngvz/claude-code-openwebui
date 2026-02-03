@@ -34,15 +34,35 @@ function stripReasoning(obj) {
 }
 
 const server = http.createServer((req, res) => {
-  // Only handle the OpenWebUI OpenAI-compatible chat endpoint
+  // Health check
+  if (req.method === "GET" && req.url === "/health") {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ status: "ok" }));
+    return;
+  }
+
+  // Only handle the OpenAI-compatible chat completions route
   if (req.method !== "POST" || req.url !== "/api/v1/chat/completions") {
     res.writeHead(404, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ error: "Not found" }));
     return;
   }
 
+  // Collect request body
   let body = "";
-  req.on("data", (chunk) => (body += chunk));
+  req.setEncoding("utf8");
+
+  req.on("data", (chunk) => {
+    body += chunk;
+
+    // basic guardrail against runaway bodies (adjust if needed)
+    if (body.length > 25 * 1024 * 1024) {
+      res.writeHead(413, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "Request too large" }));
+      req.destroy();
+    }
+  });
+
   req.on("end", () => {
     let payload;
     try {
@@ -70,6 +90,7 @@ const server = http.createServer((req, res) => {
         headers,
       },
       (upstreamRes) => {
+        // Pass through status + headers (works fine for streaming responses too)
         res.writeHead(upstreamRes.statusCode || 502, upstreamRes.headers);
         upstreamRes.pipe(res);
       }
@@ -83,10 +104,14 @@ const server = http.createServer((req, res) => {
     upstreamReq.write(JSON.stringify(payload));
     upstreamReq.end();
   });
+
+  req.on("error", (err) => {
+    res.writeHead(400, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: String(err) }));
+  });
 });
 
 server.listen(3457, "127.0.0.1", () => {
   console.log("✅ strip-reasoning-proxy listening on http://127.0.0.1:3457");
   console.log("   forwarding to:", UPSTREAM_URL);
 });
-
